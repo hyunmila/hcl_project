@@ -14,6 +14,8 @@ if not cap.isOpened():
 else:
         print("open camera")
 
+count = 0
+direction = ''
 while True:
     ret, frame = cap.read()
     frame = cv2.cvtColor(cv2.flip(frame, 1), cv2.COLOR_BGR2RGB)
@@ -34,40 +36,50 @@ while True:
                     face_2d.append([x, y])
                     face_3d.append([x, y, lm.z])
 
-            face_2d = np.array(face_2d, dtype=np.float64)
-            face_3d = np.array(face_3d, dtype=np.float64)
-            focal_lenght = 1*img_w
-            cam_matrix = np.array([[focal_lenght, 0, img_h / 2], [0, focal_lenght, img_w / 2], [0, 0, 1]])
-            dist_matrix = np.zeros((4, 1), dtype=np.float64)
-            success, rot_vec, trans_vec = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix)
-            rmat, jac = cv2.Rodrigues(rot_vec)
-            angles, _, _, _, _, _= cv2.RQDecomp3x3(rmat)
-            horizontal_angle = angles[1] * 360
-            vertical_angle = angles[0] * 360
-            type = ""
-            value = 0
-            signal = '+'
-            if abs(horizontal_angle) > abs(vertical_angle):
-                type = "horizontal_angle"
-                value = horizontal_angle
+        face_2d = np.array(face_2d, dtype=np.float64)
+        face_3d = np.array(face_3d, dtype=np.float64)
+        focal_lenght = 1*img_w
+        cam_matrix = np.array([[focal_lenght, 0, img_h / 2], [0, focal_lenght, img_w / 2], [0, 0, 1]])
+        dist_matrix = np.zeros((4, 1), dtype=np.float64)
+        success, rot_vec, trans_vec = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix)
+        rmat, jac = cv2.Rodrigues(rot_vec)
+        angles, _, _, _, _, _= cv2.RQDecomp3x3(rmat)
+        horizontal_angle = angles[1] * 360
+        vertical_angle = angles[0] * 360
+        type = ""
+        value = 0
+        signal = ''
+        last_direction = direction
+        if abs(horizontal_angle) > abs(vertical_angle):
+            type = "horizontal_angle"
+            value = horizontal_angle
+        else:
+            type = "vertical_angle"
+            value = vertical_angle
+
+        if value > 10:
+            count += 1
+            if type == "horizontal_angle":
+                direction = 'right'
             else:
-                type = "vertical_angle"
-                value = vertical_angle
+                direction = 'up'
 
-            if value > 10:
-                if type == "horizontal_angle":
-                    signal = '>'
-                else:
-                    signal = '^'
+        elif value < -10:
+            count += 1
+            if type == "horizontal_angle":
+                direction = 'left'
+            else:
+                direction = 'down'
+        else:
+            count = 0 #reset - looking forward
+            direction = ''
+        if last_direction != direction and direction != '': #in case if changed direction - reset
+            count = 0
 
-            if value < -10:
-                if type == "horizontal_angle":
-                    signal = '<'
-                else:
-                    signal = 'v'
-        
-        print(signal)
-   
+        if count == 2:
+            signal = direction
+        print(signal) # zmienić printa na wysyłanie danych
+   #można by teoretycznie zastanowić się nad sterowaniem za pomocą zmiany kąta, pierwszej pochodnej. Ale nie wiem, czy gra jest warta zachodu. To działa, jako tako, ale działa.
     # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     cv2.imshow('frame', frame)
     if cv2.waitKey(1) == ord('q'):
