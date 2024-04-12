@@ -60,16 +60,16 @@ while True:
         if value > 10:
             count += 1
             if type == "horizontal_angle":
-                direction = 'right'
+                direction = 'RIGHT'
             else:
-                direction = 'up'
+                direction = 'UP'
 
         elif value < -10:
             count += 1
             if type == "horizontal_angle":
-                direction = 'left'
+                direction = 'LEFT'
             else:
-                direction = 'down'
+                direction = 'DOWN'
         else:
             count = 0 #reset - looking forward
             direction = ''
