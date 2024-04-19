@@ -6,7 +6,7 @@ import mediapipe as mp
 import websocket
 import threading
 
-print("open camera")
+# print("open camera")
 
 
 
@@ -58,7 +58,8 @@ def get_user_input(ws):
             rmat, jac = cv2.Rodrigues(rot_vec)
             angles, _, _, _, _, _ = cv2.RQDecomp3x3(rmat)
             horizontal_angle = angles[1] * 360
-            vertical_angle = angles[0] * 360
+            vertical_angle = angles[0] * 360 - 13
+            print(vertical_angle)
             type = ""
             value = 0
             signal = ''
@@ -127,7 +128,11 @@ def on_open(ws):
 
 
 # websocket.enableTrace(True)
-ws = websocket.WebSocketApp("ws://localhost:8080/Auth",
+# ws = websocket.WebSocketApp("ws://localhost:8080/Auth",
+#                             on_message=on_message,
+#                             on_error=on_error,
+#                             on_close=on_close)
+ws = websocket.WebSocketApp("ws://192.168.43.187:2137/Auth",
                             on_message=on_message,
                             on_error=on_error,
                             on_close=on_close)
