@@ -6,14 +6,9 @@ import mediapipe as mp
 import websocket
 import threading
 
-# print("open camera")
-
-
-
 
 def get_user_input(ws):
     mp_face_mesh = mp.solutions.face_mesh
-
 
     face_mesh = mp_face_mesh.FaceMesh(
         min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -33,10 +28,7 @@ def get_user_input(ws):
         img_h, img_w, img_c = frame.shape
         face_3d = []
         face_2d = []
-
-        # frame.flags.writable = False
         result = face_mesh.process(frame)
-        # frame.flags.writable = True
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         if result.multi_face_landmarks:
             for face_landmark in result.multi_face_landmarks:
@@ -95,8 +87,6 @@ def get_user_input(ws):
                 
             if signal != '':
                 ws.send(signal.upper())
-    # można by teoretycznie zastanowić się nad sterowaniem za pomocą zmiany kąta, pierwszej pochodnej. Ale nie wiem, czy gra jest warta zachodu. To działa, jako tako, ale działa.
-        # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         cv2.imshow('frame', frame)
         if cv2.waitKey(1) == ord('q'):
             break
